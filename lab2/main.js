@@ -11,7 +11,6 @@ window.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = container.innerHTML.substring(1, container.innerHTML.length); 
         }
         var num2 = Math.floor(Math.random() * 3) + 1;
-        console.log(num2);
         for (var i = 0; i < num2; i++) {
             char = Math.floor(Math.random() * 26) + 97;
             container.innerHTML += String.fromCharCode(char);
