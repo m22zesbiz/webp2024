@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景點觀光展覽資訊</title>
+    <style>
+        h1 {
+            margin: 10px 0;
+        }
+        table {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse; 
+            width: 100%; 
+        }
+        td, th {
+            border: 1px solid #ddd; 
+            padding: 6px; 
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6d;
+            color: white;
+        }
+        .flexbox {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="flexbox">
+        <h1>景點觀光展覽資訊</h1>
+        <input id="searchBox" placeholder="搜尋..." oninput="search()">
+    </div>
+    <div class="flexbox" style="margin: 10px 0;">
+        <button onclick="previousPage()">上一頁</button>
+        <div><span id="pageNow"></span>/<span id="totalPages"></span>頁</div>
+        <button onclick="nextPage()">下一頁</button>
+    </div>
+    <table id="attractions">
+        <tr>
+            <th>名稱</th>
+            <th>地點</th>
+            <th>票價</th>
+        </tr>
+    </table>
+    <div class="flexbox" style="margin: 10px 0;">
+        <button onclick="previousPage()">上一頁</button>
+        <div><span id="pageNow2"></span>/<span id="totalPages2"></span>頁</div>
+        <button onclick="nextPage()">下一頁</button>
+    </div>
+</body>
+<script>
+    var attractions = []; 
+    var searchResult = [];
+    var pageNow = 1;
+    var totalPages = 0;
+    var searchBox = document.getElementById("searchBox");
+
+    var openUrl = "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=6";
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", openUrl, true);
+    xhr.send();
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            document.getElementById("attractions").innerHTML = "<tr><th>名稱</th><th>地點</th><th>票價</th></tr>";
+            var dataset = JSON.parse(xhr.responseText);
+            attractions = dataset.map((attraction) => {
+                return {
+                    name: attraction.title,
+                    location: attraction.showInfo[0].location,
+                    price: attraction.showInfo[0].price
+                };
+            });
+            totalPages = Math.ceil(attractions.length / 10);
+            var displayAttractions = attractions.slice(0, 10);
+            display(displayAttractions);
+            document.getElementById("pageNow").innerText = pageNow;
+            document.getElementById("totalPages").innerText = totalPages;
+            document.getElementById("pageNow2").innerText = pageNow;
+            document.getElementById("totalPages2").innerText = totalPages;
+        }
+    };
+    function display(attractions) {
+        var table = document.getElementById("attractions");
+        attractions.forEach((attraction) => {
+            var row = table.insertRow(-1);
+            var nameCell = row.insertCell(0);
+            var locationCell = row.insertCell(1);
+            var priceCell = row.insertCell(2);
+            nameCell.innerText = attraction.name;
+            locationCell.innerText = attraction.location;
+            priceCell.innerText = attraction.price;
+        });
+    }
+    function search() {
+        var keyword = searchBox.value;
+        searchResult = attractions.filter((attraction) => {
+            return attraction.name.includes(keyword);
+        });
+        pageNow = 1;
+        totalPages = Math.ceil(searchResult.length / 10);
+        var displayAttractions = searchResult.slice(0, 10);
+        document.getElementById("attractions").innerHTML = "<tr><th>名稱</th><th>地點</th><th>票價</th></tr>";
+        display(displayAttractions);
+        document.getElementById("pageNow").innerText = pageNow;
+        document.getElementById("totalPages").innerText = totalPages;
+        document.getElementById("pageNow2").innerText = pageNow;
+        document.getElementById("totalPages2").innerText = totalPages;
+}
+    function previousPage() {
+        if (pageNow > 1) {
+            pageNow--;
+            document.getElementById("pageNow").innerText = pageNow;
+            document.getElementById("pageNow2").innerText = pageNow;
+            document.getElementById("attractions").innerHTML = "<tr><th>名稱</th><th>地點</th><th>票價</th></tr>";
+            if (searchBox.value == "") {
+                var displayAttractions = attractions.slice((pageNow - 1) * 10, pageNow * 10);
+            } else {
+                var displayAttractions = searchResult.slice((pageNow - 1) * 10, pageNow * 10);
+            }
+            display(displayAttractions);
+        }
+    };
+    function nextPage() {
+        if (pageNow < totalPages) {
+            pageNow++;
+            document.getElementById("pageNow").innerText = pageNow;
+            document.getElementById("pageNow2").innerText = pageNow;
+            document.getElementById("attractions").innerHTML = "<tr><th>名稱</th><th>地點</th><th>票價</th></tr>";
+            if(searchBox.value == "") {
+                var displayAttractions = attractions.slice((pageNow - 1) * 10, pageNow * 10);
+            } else {
+                var displayAttractions = searchResult.slice((pageNow - 1) * 10, pageNow * 10);
+            }
+            display(displayAttractions);
+        }
+    };
+</script>
+</html>
